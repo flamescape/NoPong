@@ -4,6 +4,7 @@ var express = require('express')
   , app = express()
   , server = require('http').createServer(app)
   , io = require('socket.io').listen(server, {log:false})
+  , GameRoom = require('./GameRoom')
   ;
 
 server.listen(8080);
@@ -15,28 +16,18 @@ io.sockets.on('connection', function(sock) {
     sock.join('waitingForGame');
 });
 
-
-var runningGames = [];
-
 // matchmaker
-var gameCounter = 0;
 setInterval(function(){
     while (true) {
         var waitingClients = io.sockets.clients('waitingForGame')
         if (waitingClients.length < 2)
             break;
-    
-        console.log('Found 2 clients - '+('matchmaking!'.red));
-        var roomName = 'game.'+(++gameCounter);
-        waitingClients.slice(0, 2).forEach(function(wc, idx){
+
+        var gameRoom = new GameRoom(io);
+        
+        waitingClients.slice(0, 2).forEach(function(wc){
             wc.leave('waitingForGame');
-            wc.join(roomName);
-            console.log('Player '+(idx+1)+': '+(wc.handshake.address.address.cyan));
+            gameRoom.join(wc);
         });
-        io.sockets.in(roomName).emit('startGame', {
-            'roomNumber': gameCounter,
-            'competitors': io.sockets.clients('room').map(function(i){return i.handshake.address.address})
-        });
-        console.log('Fight!!'.yellow);
     }
 }, 2000);

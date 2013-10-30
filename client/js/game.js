@@ -1,5 +1,8 @@
 
 var socket = io.connect();
+socket.on('startGame', function(roomState){
+    console.log('Room State', roomState);
+});
 
 var stage = new Kinetic.Stage({
     container: 'container',

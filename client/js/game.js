@@ -35,7 +35,8 @@ var player1 = new Kinetic.Rect({
     height: pHeight,
     fill: '#FFF',
     stroke: 'black',
-    strokewidth: 1
+    strokewidth: 1,
+    draggable: true
 });
 
 var player2 = new Kinetic.Rect({
@@ -61,3 +62,9 @@ layer.add(player2);
 layer.add(ball);
 
 stage.add(layer);
+
+stage.on('mousemove', function() {
+    var mousePos = stage.getMousePosition();
+    player1.setAttr('y', mousePos.y);
+    layer.batchDraw();
+});

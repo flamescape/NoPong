@@ -3,11 +3,21 @@ var socket = io.connect();
 
 var stage = new Kinetic.Stage({
     container: 'container',
-    width: 578,
-    height: 200
+    width: 800,
+    height: 600
 });
 
-var layer = new Kinetic.Layer();
+var layer = new Kinetic.Layer({
+    fill: 'red'
+});
+
+var bg = new Kinetic.Rect({
+    x: 0,
+    y: 0,
+    width: 800,
+    height: 600,
+    fill: '#111'
+});
 
 var rect = new Kinetic.Rect({
     x: 239,
@@ -19,6 +29,7 @@ var rect = new Kinetic.Rect({
     strokewidth: 1
 });
 
+layer.add(bg);
 layer.add(rect);
 
 stage.add(layer);

@@ -8,6 +8,16 @@ var socket = io.connect();
 socket.on('startGame', function(roomState){
     console.log('Room State', roomState);
     document.getElementById("roomid").innerHTML = "Room: " + roomState.roomNumber;
+    
+    socket.emit('m', 0.5);
+    
+    socket.on('m', function(data){
+        console.log('Some paddle moved', data);
+    });
+    
+    socket.on('b', function(data){
+        console.log('The ball moved (bounced?)', data);
+    });
 });
 
 var stage = new Kinetic.Stage({

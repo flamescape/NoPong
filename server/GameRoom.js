@@ -7,6 +7,7 @@ var GameRoom = function(io){
     this.roomNumber = ++gameCounter;
     this.ioRoom = 'game.'+this.roomNumber;
     this.clients = [];
+    this.ball = {};
     this.log('Room Created'.red);
 };
 GameRoom.prototype.join = function(sock){
@@ -20,8 +21,8 @@ GameRoom.prototype.join = function(sock){
         score: 0
     };
     
-    sock.on('movePaddle', function(){
-        
+    sock.on('m', function(pos){
+        sock.broadcast.to(this.ioRoom).volatile.emit('m', {side:client.side, pos:pos});
     });
     
     this.clients.push(client);
@@ -32,11 +33,31 @@ GameRoom.prototype.join = function(sock){
         this.gameStart();
 };
 GameRoom.prototype.gameStart = function(){
-    this.io.sockets.in(this.ioRoom).emit('startGame', {
-        'roomNumber': this.roomNumber,
-        'competitors': this.io.sockets.clients(this.ioRoom).map(function(i){return i.handshake.address.address})
-    });
+    this.clients.forEach(function(client){
+        client.sock.emit('startGame', {
+            roomNumber: this.roomNumber,
+            competitors: this.clients.map(function(cli){
+                return {
+                    ip: cli.sock.handshake.address.address,
+                    score: cli.score,
+                    side: cli.side
+                };
+            }),
+            yourSide: client.side
+        });
+    }.bind(this));
     this.log('Fight!!'.yellow);
+    
+    this.broadcastBallUpdate.call(this, 0.5, 0.5, 0, 0);
+    setTimeout(this.broadcastBallUpdate.bind(this, 0.5, 0.5, 1, 0.5), 2000);
+};
+GameRoom.prototype.broadcastBallUpdate = function(x, y, xspeed, yspeed) {
+    this.ball.x = x;
+    this.ball.y = y;
+    this.ball.xspeed = xspeed;
+    this.ball.yspeed = yspeed;
+    
+    this.io.sockets.in(this.ioRoom).emit('b', this.ball);
 };
 GameRoom.prototype.log = function(){
     console.log.bind(console, 'Game Room '+this.roomNumber+':').apply(console, arguments);

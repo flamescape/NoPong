@@ -30,7 +30,7 @@ var bg = new Kinetic.Rect({
 
 var player1 = new Kinetic.Rect({
     x: gMargin,
-    y: 75,
+    y: 75, //arbitrary number for now 
     width: pWidth,
     height: pHeight,
     fill: '#FFF',
@@ -40,7 +40,7 @@ var player1 = new Kinetic.Rect({
 
 var player2 = new Kinetic.Rect({
     x: gWidth - (gMargin + pWidth),
-    y: 205,
+    y: 205, //arbitrary number for now
     width: pWidth,
     height: pHeight,
     fill: '#FFF',

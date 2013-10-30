@@ -2,6 +2,7 @@
 var socket = io.connect();
 socket.on('startGame', function(roomState){
     console.log('Room State', roomState);
+    document.getElementById("roomid").innerHTML = "Room: " + roomState.roomNumber;
 });
 
 var stage = new Kinetic.Stage({

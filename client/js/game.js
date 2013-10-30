@@ -12,8 +12,8 @@ socket.on('startGame', function(roomState){
 
 var stage = new Kinetic.Stage({
     container: 'container',
-    width: 800,
-    height: 600
+    width: gWidth,
+    height: gHeight
 });
 
 var layer = new Kinetic.Layer({

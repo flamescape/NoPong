@@ -1,3 +1,8 @@
+var gWidth = 800;
+var gHeight = 600;
+var gMargin = 20;
+var pWidth = 15;
+var pHeight = 80;
 
 var socket = io.connect();
 socket.on('startGame', function(roomState){
@@ -18,26 +23,26 @@ var layer = new Kinetic.Layer({
 var bg = new Kinetic.Rect({
     x: 0,
     y: 0,
-    width: 800,
-    height: 600,
+    width: gWidth,
+    height: gHeight,
     fill: '#111'
 });
 
 var player1 = new Kinetic.Rect({
-    x: 20,
+    x: gMargin,
     y: 75,
-    width: 15,
-    height: 80,
+    width: pWidth,
+    height: pHeight,
     fill: '#FFF',
     stroke: 'black',
     strokewidth: 1
 });
 
 var player2 = new Kinetic.Rect({
-    x: 800-40,
+    x: gWidth - (gMargin + pWidth),
     y: 205,
-    width: 15,
-    height: 80,
+    width: pWidth,
+    height: pHeight,
     fill: '#FFF',
     stroke: 'black',
     strokewidth: 1

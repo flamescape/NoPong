@@ -20,8 +20,9 @@ GameRoom.prototype.join = function(sock){
         score: 0
     };
     
-    sock.on('movePaddle', function(){
-        
+    sock.on('m', function(data){
+        data.what = 'Player '+client.side+'\'s paddle moved, just letting you know.';
+        sock.broadcast.to(this.ioRoom).volatile.emit('m', data);
     });
     
     this.clients.push(client);

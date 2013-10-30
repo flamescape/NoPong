@@ -23,17 +23,28 @@ var bg = new Kinetic.Rect({
     fill: '#111'
 });
 
-var rect = new Kinetic.Rect({
-    x: 239,
+var player1 = new Kinetic.Rect({
+    x: 20,
     y: 75,
-    width: 100,
-    height: 50,
-    fill: 'pink',
+    width: 15,
+    height: 80,
+    fill: '#FFF',
+    stroke: 'black',
+    strokewidth: 1
+});
+
+var player2 = new Kinetic.Rect({
+    x: 800-40,
+    y: 205,
+    width: 15,
+    height: 80,
+    fill: '#FFF',
     stroke: 'black',
     strokewidth: 1
 });
 
 layer.add(bg);
-layer.add(rect);
+layer.add(player1);
+layer.add(player2);
 
 stage.add(layer);

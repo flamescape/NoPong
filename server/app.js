@@ -27,11 +27,15 @@ setInterval(function(){
             break;
     
         console.log('Found 2 clients - '+('matchmaking!'.red));
-        gameCounter++;
+        var roomName = 'game.'+(++gameCounter);
         waitingClients.slice(0, 2).forEach(function(wc, idx){
             wc.leave('waitingForGame');
-            wc.join('game.'+gameCounter);
+            wc.join(roomName);
             console.log('Player '+(idx+1)+': '+(wc.handshake.address.address.cyan));
+        });
+        io.sockets.in(roomName).emit('startGame', {
+            'roomNumber': gameCounter,
+            'competitors': io.sockets.clients('room').map(function(i){return i.handshake.address.address})
         });
         console.log('Fight!!'.yellow);
     }

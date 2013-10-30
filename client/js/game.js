@@ -48,8 +48,16 @@ var player2 = new Kinetic.Rect({
     strokewidth: 1
 });
 
+var ball = new Kinetic.Ellipse({
+    radius: 7.5,
+    x: 100,
+    y: 100,
+    fill: "#FFF"
+});
+
 layer.add(bg);
 layer.add(player1);
 layer.add(player2);
+layer.add(ball);
 
 stage.add(layer);

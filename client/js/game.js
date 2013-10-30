@@ -76,5 +76,10 @@ stage.add(layer);
 stage.on('mousemove', function() {
     var mousePos = stage.getMousePosition();
     player1.setAttr('y', mousePos.y);
-    layer.batchDraw();
 });
+
+var gameInterval = setInterval(function(){gameLoop();}, 50);
+
+var gameLoop = function() {
+    layer.batchDraw();
+};

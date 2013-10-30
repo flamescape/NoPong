@@ -1,27 +1,39 @@
 require('colors');
 
+var gameCounter = 0;
+
 var GameRoom = function(io){
     this.io = io;
-    this.roomNumber = ++this.gameCounter;
+    this.roomNumber = ++gameCounter;
     this.ioRoom = 'game.'+this.roomNumber;
     this.clients = [];
     this.log('Room Created'.red);
 };
-GameRoom.prototype.join = function(client){
+GameRoom.prototype.join = function(sock){
     if (this.clients.length >= 2)
         throw new Error('Too many clients in this room'); // until we add spectators AmIRite?
+    
+    sock.join(this.ioRoom);
+    var client = {
+        sock: sock,
+        side: this.clients.length + 1, // 1 == left, 2 == right; anything else == wtf
+        score: 0
+    };
+    
+    sock.on('movePaddle', function(){
         
+    });
+    
     this.clients.push(client);
-    client.join(this.ioRoom);
-    client.set('side', this.clients.length); // 1 == left, 2 == right; anything else == wtf
-    this.log('Player '+(this.clients.length)+' joined: '+(client.handshake.address.address.cyan));
+    
+    this.log('Player '+client.side+' joined: '+(sock.handshake.address.address.cyan));
     
     if (this.clients.length == 2)
         this.gameStart();
 };
 GameRoom.prototype.gameStart = function(){
     this.io.sockets.in(this.ioRoom).emit('startGame', {
-        'roomNumber': this.gameCounter,
+        'roomNumber': this.roomNumber,
         'competitors': this.io.sockets.clients(this.ioRoom).map(function(i){return i.handshake.address.address})
     });
     this.log('Fight!!'.yellow);
@@ -29,6 +41,5 @@ GameRoom.prototype.gameStart = function(){
 GameRoom.prototype.log = function(){
     console.log.bind(console, 'Game Room '+this.roomNumber+':').apply(console, arguments);
 };
-GameRoom.prototype.gameCounter = 0;
 
 module.exports = GameRoom;

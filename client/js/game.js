@@ -1,3 +1,3 @@
 
+var socket = io.connect();
 
-// do game stuff here

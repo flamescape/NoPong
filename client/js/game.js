@@ -12,11 +12,14 @@ socket.on('startGame', function(roomState){
     socket.emit('m', 0.5);
     
     socket.on('m', function(data){
-        console.log('Some paddle moved', data);
+        player2.setAttr('y', data.pos*gHeight);
+        //console.log('Some paddle moved', data);
     });
     
     socket.on('b', function(data){
-        console.log('The ball moved (bounced?)', data);
+        ball.setAttr('x', gWidth*data.x);
+        ball.setAttr('y', gHeight*data.y);
+        //console.log('The ball moved (bounced?)', data);
     });
 });
 
@@ -76,6 +79,7 @@ stage.add(layer);
 stage.on('mousemove', function() {
     var mousePos = stage.getMousePosition();
     player1.setAttr('y', mousePos.y);
+    socket.emit('m', mousePos.y/gHeight);
 });
 
 var gameInterval = setInterval(function(){gameLoop();}, 50);

@@ -73,7 +73,7 @@ layer.add(ball);
 
 stage.add(layer);
 
-stage.on('mousemove', function() {
+var gameLoop = function() {
     var mousePos = stage.getMousePosition();
     var pPos;
 
@@ -89,9 +89,7 @@ stage.on('mousemove', function() {
     //Update the paddle position and send it to Gareth's shitty server
     player1.setAttr('y', pPos);
     socket.emit('m', pPos / gHeight);
-});
-
-var gameLoop = function() {
+    
     //batchDraw() is limited by the maximum browser fps
     //  See http://www.html5canvastutorials.com/kineticjs/html5-canvas-kineticjs-batch-draw/
     layer.batchDraw();

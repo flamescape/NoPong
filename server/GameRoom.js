@@ -49,11 +49,10 @@ GameRoom.prototype.gameStart = function(){
     }.bind(this));
     this.log('Fight!!'.yellow);
     
-    this.broadcastBallUpdate.call(this, 0.5, 0.5, 0, 0);
-    setTimeout(this.broadcastBallUpdate.bind(this, {angle:1,speed:0.01}), 2000);
+    setTimeout(this.updateBall.bind(this, {angle:1,speed:0.01}), 2000);
 };
-GameRoom.prototype.updateBall = function() {
-    _.extend(this.ball, ballUpdate || {});
+GameRoom.prototype.updateBall = function(ball) {
+    _.extend(this.ball, ball || {});
     this.io.sockets.in(this.ioRoom).emit('b', this.ball);
 };
 GameRoom.prototype.log = function(){

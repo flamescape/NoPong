@@ -76,7 +76,12 @@ layer.add(ball);
 
 stage.add(layer);
 
+stage.on('mouseout', function() {
+    document.body.style.cursor = "default";
+});
+
 stage.on('mousemove', function() {
+    document.body.style.cursor = "none";
     var mousePos = stage.getMousePosition();
     var pPos = mousePos.y - (pHeight/2);
     player1.setAttr('y', pPos);

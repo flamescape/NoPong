@@ -7,6 +7,7 @@ var pHeight = 80; //Player paddle height
 var socket = io.connect();
 socket.on('startGame', function(roomState){
     console.log('Room State', roomState);
+    console.log(roomState);
     document.getElementById("roomid").innerHTML = "Room: " + roomState.roomNumber;
     
     socket.emit('m', 0.5);
@@ -74,21 +75,23 @@ layer.add(ball);
 stage.add(layer);
 
 var gameLoop = function() {
-    var mousePos = stage.getMousePosition();
-    var pPos;
+    if (stage.getMousePosition() !== undefined) {
+        var mousePos = stage.getMousePosition();
+        var pPos;
 
-    //Let's prevent the paddle from going out of bounds
-    if (pHeight / 2 > mousePos.y) {
-        pPos = 0;
-    } else if (pHeight / 2 > (gHeight - mousePos.y)) {
-        pPos = gHeight - pHeight;
-    } else {
-        pPos = mousePos.y - (pHeight/2);
+        //Let's prevent the paddle from going out of bounds
+        if (pHeight / 2 > mousePos.y) {
+            pPos = 0;
+        } else if (pHeight / 2 > (gHeight - mousePos.y)) {
+            pPos = gHeight - pHeight;
+        } else {
+            pPos = mousePos.y - (pHeight/2);
+        }
+
+        //Update the paddle position and send it to Gareth's shitty server
+        player1.setAttr('y', pPos);
+        socket.emit('m', pPos / gHeight);
     }
-
-    //Update the paddle position and send it to Gareth's shitty server
-    player1.setAttr('y', pPos);
-    socket.emit('m', pPos / gHeight);
     
     //batchDraw() is limited by the maximum browser fps
     //  See http://www.html5canvastutorials.com/kineticjs/html5-canvas-kineticjs-batch-draw/

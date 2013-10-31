@@ -99,9 +99,7 @@ stage.on('mousemove', function() {
     socket.emit('m', pPos / gHeight);
 });
 
-var gameInterval = setInterval(function(){
-    gameLoop();
-}, 50);
+var gameInterval = setInterval(gameLoop, 50);
 
 var gameLoop = function() {
     //batchDraw() is limited by the maximum browser fps

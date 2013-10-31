@@ -78,8 +78,9 @@ stage.add(layer);
 
 stage.on('mousemove', function() {
     var mousePos = stage.getMousePosition();
-    player1.setAttr('y', mousePos.y);
-    socket.emit('m', mousePos.y/gHeight);
+    var pPos = mousePos.y - (pHeight/2);
+    player1.setAttr('y', pPos);
+    socket.emit('m', pPos/gHeight);
 });
 
 var gameInterval = setInterval(function(){gameLoop();}, 50);

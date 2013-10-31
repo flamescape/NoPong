@@ -1,8 +1,8 @@
-var gWidth = 800;
-var gHeight = 600;
-var gMargin = 20;
-var pWidth = 15;
-var pHeight = 80;
+var gWidth = 800; //Game window width
+var gHeight = 600; //Game window height
+var gMargin = 20; //Game window side margins
+var pWidth = 15; //Player paddle width
+var pHeight = 80; //Player paddle height
 
 var socket = io.connect();
 socket.on('startGame', function(roomState){
@@ -12,13 +12,13 @@ socket.on('startGame', function(roomState){
     socket.emit('m', 0.5);
     
     socket.on('m', function(data){
-        player2.setAttr('y', data.pos*gHeight);
+        player2.setAttr('y', data.pos * gHeight);
         //console.log('Some paddle moved', data);
     });
     
     socket.on('b', function(data){
-        ball.setAttr('x', gWidth*data.x);
-        ball.setAttr('y', gHeight*data.y);
+        ball.setAttr('x', gWidth * data.x);
+        ball.setAttr('y', gHeight * data.y);
         //console.log('The ball moved (bounced?)', data);
     });
 });
@@ -29,9 +29,7 @@ var stage = new Kinetic.Stage({
     height: gHeight
 });
 
-var layer = new Kinetic.Layer({
-    fill: 'red'
-});
+var layer = new Kinetic.Layer();
 
 var bg = new Kinetic.Rect({
     x: 0,
@@ -49,7 +47,6 @@ var player1 = new Kinetic.Rect({
     fill: '#FFF',
     stroke: 'black',
     strokewidth: 1,
-    draggable: true
 });
 
 var player2 = new Kinetic.Rect({
@@ -77,18 +74,21 @@ layer.add(ball);
 stage.add(layer);
 
 stage.on('mouseout', function() {
+    //apparate the cursor
     document.body.style.cursor = "default";
 });
 
 stage.on('mousemove', function() {
+    //Hide the cursor
     document.body.style.cursor = "none";
+
     var mousePos = stage.getMousePosition();
     var pPos;
 
     //Let's prevent the paddle from going out of bounds
-    if (pHeight/2 > mousePos.y) {
+    if (pHeight / 2 > mousePos.y) {
         pPos = 0;
-    } else if (pHeight/2 > (gHeight - mousePos.y)) {
+    } else if (pHeight / 2 > (gHeight - mousePos.y)) {
         pPos = gHeight - pHeight;
     } else {
         pPos = mousePos.y - (pHeight/2);
@@ -96,11 +96,15 @@ stage.on('mousemove', function() {
 
     //Update the paddle position and send it to Gareth's shitty server
     player1.setAttr('y', pPos);
-    socket.emit('m', pPos/gHeight);
+    socket.emit('m', pPos / gHeight);
 });
 
-var gameInterval = setInterval(function(){gameLoop();}, 50);
+var gameInterval = setInterval(function(){
+    gameLoop();
+}, 50);
 
 var gameLoop = function() {
+    //batchDraw() is limited by the maximum browser fps
+    //  See http://www.html5canvastutorials.com/kineticjs/html5-canvas-kineticjs-batch-draw/
     layer.batchDraw();
 };

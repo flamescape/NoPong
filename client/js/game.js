@@ -19,7 +19,7 @@ socket.on('startGame', function(roomState){
     socket.on('b', function(data){
         ball.setAttr('x', gWidth * data.x);
         ball.setAttr('y', gHeight * data.y);
-        //console.log('The ball moved (bounced?)', data);
+        console.log('The ball moved (bounced?)', data);
     });
 });
 
@@ -91,10 +91,10 @@ stage.on('mousemove', function() {
     socket.emit('m', pPos / gHeight);
 });
 
-var gameInterval = setInterval(gameLoop, 50);
-
 var gameLoop = function() {
     //batchDraw() is limited by the maximum browser fps
     //  See http://www.html5canvastutorials.com/kineticjs/html5-canvas-kineticjs-batch-draw/
     layer.batchDraw();
 };
+
+setInterval(gameLoop, 50);

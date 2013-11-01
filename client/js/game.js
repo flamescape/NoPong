@@ -1,23 +1,47 @@
-var gWidth = 800; //Game window width
-var gHeight = 600; //Game window height
-var gMargin = 20; //Game window side margins
-var pWidth = 15; //Player paddle width
-var pHeight = 80; //Player paddle height
+var gRatio = 16/9;
+var gWidth = document.width; //Game window width
+var gHeight = parseInt(gWidth / gRatio); //Game window height
 
+// set up stage
+var stage = new Kinetic.Stage({
+    container: 'container',
+    width: gWidth,
+    height: gHeight
+});
+var layer = new Kinetic.Layer();
+var bg = new Kinetic.Rect({
+    x: 0,
+    y: 0,
+    width: gWidth,
+    height: gHeight,
+    fill: '#111'
+});
+layer.add(bg);
+//layer.add(player1);
+//layer.add(player2);
+//layer.add(ball);
+stage.add(layer);
+
+// the key elements of the game:
 var gameBall = new GameBall();
-gameBall.update({speed:0.004, angle: 1});
+var paddles = [];
 
+// connect to server
 var socket = io.connect();
-socket.on('startGame', function(roomState){
+socket.on('enterRoom', function(roomState){
     console.log('Room State', roomState);
-    console.log(roomState);
     document.getElementById("roomid").innerHTML = "Room: " + roomState.roomNumber;
     
-    socket.emit('m', 0.5);
-    
-    socket.on('m', function(data){
-        player2.setAttr('y', data.pos * gHeight);
-        //console.log('Some paddle moved', data);
+    paddles = roomState.competitors.map(function(competitorInfo){
+        // this paddle is controlled by what?
+        var controller = (competitorInfo.side === roomState.yourSide)
+                       ? new LocalController(socket, stage)
+                       : new RemoteController(socket, competitorInfo.side);
+                       
+        // create the paddle
+        var paddle = new Paddle(competitorInfo, controller);
+        gameBall.addCollidingPaddle(paddle); // the ball should be wary of this paddle
+        return paddle;
     });
     
     socket.on('b', function(data){
@@ -26,82 +50,33 @@ socket.on('startGame', function(roomState){
     });
 });
 
-var stage = new Kinetic.Stage({
-    container: 'container',
-    width: gWidth,
-    height: gHeight
-});
+var gamePhysics = function() {
+    gameBall.tick();
+};
+    
+var gameDraw = function() {
 
-var layer = new Kinetic.Layer();
+    paddles.forEach(function(paddle){
+        var attrs = {
+            offsetX: (paddle.width / 2) * gWidth,
+            offsetY: (paddle.height / 2) * gHeight,
+            x: paddle.x * gWidth,
+            y: paddle.getPosition() * gHeight,
+            width: paddle.width * gWidth,
+            height: paddle.height * gHeight
+        };
 
-var bg = new Kinetic.Rect({
-    x: 0,
-    y: 0,
-    width: gWidth,
-    height: gHeight,
-    fill: '#111'
-});
-
-var player1 = new Kinetic.Rect({
-    x: gMargin,
-    y: 75, //arbitrary number for now
-    width: pWidth,
-    height: pHeight,
-    fill: '#FFF',
-    stroke: 'black',
-    strokewidth: 1,
-});
-
-var player2 = new Kinetic.Rect({
-    x: gWidth - (gMargin + pWidth),
-    y: 205, //arbitrary number for now
-    width: pWidth,
-    height: pHeight,
-    fill: '#FFF',
-    stroke: 'black',
-    strokewidth: 1
-});
-
-var ball = new Kinetic.Ellipse({
-    radius: 7.5,
-    x: 100,
-    y: 100,
-    fill: "#FFF"
-});
-
-layer.add(bg);
-layer.add(player1);
-layer.add(player2);
-layer.add(ball);
-
-stage.add(layer);
-
-var gameLoop = function() {
-    if (stage.getMousePosition() !== undefined) {
-        var mousePos = stage.getMousePosition();
-        var pPos;
-
-        //Let's prevent the paddle from going out of bounds
-        if (pHeight / 2 > mousePos.y) {
-            pPos = 0;
-        } else if (pHeight / 2 > (gHeight - mousePos.y)) {
-            pPos = gHeight - pHeight;
-        } else {
-            pPos = mousePos.y - (pHeight/2);
-        }
-
-        //Update the paddle position and send it to Gareth's shitty server
-        player1.setAttr('y', pPos);
-        socket.emit('m', pPos / gHeight);
-    }
+        paddle.cliGetShape(layer).setAttrs(attrs);
+    });
     
     //batchDraw() is limited by the maximum browser fps
     //  See http://www.html5canvastutorials.com/kineticjs/html5-canvas-kineticjs-batch-draw/
-    gameBall.tick();
-    ball.setAttr('x', gWidth * gameBall.x);
-    ball.setAttr('y', gHeight * gameBall.y);
-    
     layer.batchDraw();
 };
 
-setInterval(gameLoop, 1000/60);
+// this is the game loop:
+setInterval(function() {
+                    // input is processed asynchronously, so does not need to be in the game loop
+    gamePhysics();  // movements & collisions
+    gameDraw();     // recalculate ball & paddle positions & dims
+}, 1000/60);

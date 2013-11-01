@@ -1,14 +1,18 @@
-var _ = _ || require('underscore');
+var _ = _ || require('underscore')
+  , SAT = SAT || require('./SAT')
+  ;
 
 var GameBall = function() {
     _.defaults(this, {
         x: 0.5,
         y: 0.5,
+        radius: 0.05,
         speed: 0,
         angle: 0,
         fps: 60
     });
     this.paddles = [];
+    this.collisionBox = new SAT.Box(this.x, this.y, this.radius, this.radius).toPolygon();
 };
 GameBall.prototype = {
 
@@ -66,8 +70,12 @@ GameBall.prototype = {
         var ym = Math.sin(this.angle) * this.speed * delta;
         
         // check for paddle collisions
-        this.paddles.forEach(function(){
+        this.paddles.forEach(function(paddle){
             // todo: see comment ^
+            /*
+            if (this.y + ym > paddle.top) {
+                xm = this.collideWall(xm, 0.9, true);
+            }*/
         });
         
         // check for wall collisions
@@ -76,10 +84,25 @@ GameBall.prototype = {
         xm = this.collideWall(xm, 1, true);
         xm = this.collideWall(xm, 0, true);
         
-        
         this.x += xm;
         this.y += ym;
+    },
+    
+    // only the client should ever call this function
+    cliGetShape: function() {
+        if (!this._kShape) {
+            // create shape. (position & dims are temporary. real values computed on draw)
+            this._kShape = new Kinetic.Ellipse({
+                radius: 1,
+                x: 1,
+                y: 1,
+                fill: "#FFF"
+            });
+        }
+        
+        return this._kShape;
     }
+    
 };
 
-typeof module !== 'undefined' && (module.exports = GameBall);
+(typeof module !== 'undefined') && (module.exports = GameBall);

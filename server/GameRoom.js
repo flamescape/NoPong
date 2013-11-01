@@ -37,22 +37,29 @@ GameRoom.prototype.join = function(sock){
         this.gameStart();
 };
 GameRoom.prototype.gameStart = function(){
+    var startPositions = {
+        1: 0.05,
+        2: 0.95
+    };
+
     this.clients.forEach(function(client){
-        client.sock.emit('startGame', {
+        client.sock.emit('enterRoom', {
             roomNumber: this.roomNumber,
             competitors: this.clients.map(function(cli){
                 return {
                     ip: cli.sock.handshake.address.address,
                     score: cli.score,
-                    side: cli.side
+                    side: cli.side,
+                    x: startPositions[cli.side]
                 };
             }),
             yourSide: client.side
         });
     }.bind(this));
+    
     this.log('Fight!!'.yellow);
     
-    setTimeout(this.updateBall.bind(this, {angle:1,speed:0.01}), 2000);
+    setTimeout(this.updateBall.bind(this, {angle:1,speed:0.01}), 3000);
 };
 GameRoom.prototype.updateBall = function(data) {
     this.ball.update(data);

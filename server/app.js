@@ -12,6 +12,7 @@ server.listen(8080);
 app.use(express.static('../client'));
 app.get('/js/GameBall.js', function(req, res){ res.sendfile('GameBall.js'); });
 app.get('/js/Paddle.js', function(req, res){ res.sendfile('Paddle.js'); });
+app.get('/js/lib/SAT.js', function(req, res){ res.sendfile('SAT.js'); });
 app.get('/js/lib/underscore-min.js', function(req, res){ res.sendfile('node_modules/underscore/underscore-min.js'); });
 
 io.sockets.on('connection', function(sock) {

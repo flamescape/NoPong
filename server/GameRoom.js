@@ -1,5 +1,8 @@
 require('colors');
-var _ = require('underscore');
+
+var _ = require('underscore')
+  , GameBall = require('./GameBall')
+  ;
 
 var gameCounter = 0;
 
@@ -8,7 +11,7 @@ var GameRoom = function(io){
     this.roomNumber = ++gameCounter;
     this.ioRoom = 'game.'+this.roomNumber;
     this.clients = [];
-    this.ball = {x:0.5,y:0.5,angle:0,speed:0};
+    this.ball = new GameBall();
     this.log('Room Created'.red);
 };
 GameRoom.prototype.join = function(sock){
@@ -51,8 +54,8 @@ GameRoom.prototype.gameStart = function(){
     
     setTimeout(this.updateBall.bind(this, {angle:1,speed:0.01}), 2000);
 };
-GameRoom.prototype.updateBall = function(ball) {
-    _.extend(this.ball, ball || {});
+GameRoom.prototype.updateBall = function(data) {
+    this.ball.update(data);
     this.io.sockets.in(this.ioRoom).emit('b', this.ball);
 };
 GameRoom.prototype.log = function(){

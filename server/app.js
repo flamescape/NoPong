@@ -10,6 +10,7 @@ var express = require('express')
 server.listen(8080);
 
 app.use(express.static('../client'));
+app.get('/js/GameBall.js', function(req, res){ res.sendfile('GameBall.js'); });
 
 io.sockets.on('connection', function(sock) {
     console.log('New client connected. Waiting for game.');

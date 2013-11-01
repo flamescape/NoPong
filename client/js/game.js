@@ -4,6 +4,9 @@ var gMargin = 20; //Game window side margins
 var pWidth = 15; //Player paddle width
 var pHeight = 80; //Player paddle height
 
+var gameBall = new GameBall();
+gameBall.update({speed:0.004});
+
 var socket = io.connect();
 socket.on('startGame', function(roomState){
     console.log('Room State', roomState);
@@ -18,8 +21,7 @@ socket.on('startGame', function(roomState){
     });
     
     socket.on('b', function(data){
-        ball.setAttr('x', gWidth * data.x);
-        ball.setAttr('y', gHeight * data.y);
+        gameBall.update(data);
         console.log('The ball moved (bounced?)', data);
     });
 });
@@ -95,7 +97,11 @@ var gameLoop = function() {
     
     //batchDraw() is limited by the maximum browser fps
     //  See http://www.html5canvastutorials.com/kineticjs/html5-canvas-kineticjs-batch-draw/
+    gameBall.tick();
+    ball.setAttr('x', gWidth * gameBall.x);
+    ball.setAttr('y', gHeight * gameBall.y);
+    
     layer.batchDraw();
 };
 
-setInterval(gameLoop, 50);
+setInterval(gameLoop, 1000/60);

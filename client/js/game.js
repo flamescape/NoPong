@@ -5,7 +5,7 @@ var pWidth = 15; //Player paddle width
 var pHeight = 80; //Player paddle height
 
 var gameBall = new GameBall();
-gameBall.update({speed:0.004});
+gameBall.update({speed:0.004, angle: 1});
 
 var socket = io.connect();
 socket.on('startGame', function(roomState){

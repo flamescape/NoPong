@@ -6,7 +6,7 @@ var gHeight = parseInt(gWidth / gRatio); //Game window height
 var stage = new Kinetic.Stage({
     container: 'container',
     width: gWidth,
-    height: gHeight
+    height: gHeight,
 });
 var layer = new Kinetic.Layer();
 var bg = new Kinetic.Rect({
@@ -43,7 +43,6 @@ socket.on('enterRoom', function(roomState){
     
     socket.on('b', function(data){
         gameBall.update(data);
-        console.log('The ball moved (bounced?)', data);
     });
 });
 
@@ -66,10 +65,11 @@ var gameDraw = function() {
     
     gameBall.cliGetShape(layer).setAttrs({
         offsetX: (gameBall.radius / 2) * gWidth,
-        offsetY: (gameBall.radius / 2) * gHeight,
+        offsetY: (gameBall.radius / 2) * gWidth,
         x: gameBall.x * gWidth,
         y: gameBall.y * gHeight,
-        radius: gameBall.radius * gWidth
+        width: gameBall.radius * gWidth,
+        height: gameBall.radius * gWidth
     });
     
     //batchDraw() is limited by the maximum browser fps

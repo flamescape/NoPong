@@ -31,6 +31,26 @@ GameBall.prototype = {
         return delta && delta / (1000/this.fps);
     },
     
+    collideWall: function(dm, wp, horiz) {
+        var t0 = horiz ? this.x : this.y
+          , t1 = t0 + dm
+          , after = t1 - wp
+          , before = wp - t0
+          , newM = dm
+          ;
+        
+        if ((t1 > wp && wp > t0) || (t1 < wp && wp < t0)) {
+            newM = before - after;
+            if (horiz) {
+                this.angle = (this.angle >= 0 ? Math.PI : -Math.PI) - this.angle;
+            } else {
+                this.angle = -this.angle;
+            }
+        }
+        
+        return newM;
+    },
+    
     tick: function(){
         var delta = this.calcDelta();
         if (!delta) {
@@ -51,33 +71,11 @@ GameBall.prototype = {
         });
         
         // check for wall collisions
-        if (this.y + ym > 1) {
-            var overshoot = (this.y + ym) - 1;
-            var close = 1 - this.y;
-            ym = close - overshoot;
-            this.angle = -this.angle;
-        }
+        ym = this.collideWall(ym, 1, false);
+        ym = this.collideWall(ym, 0, false);
+        xm = this.collideWall(xm, 1, true);
+        xm = this.collideWall(xm, 0, true);
         
-        if (this.x + xm > 1) {
-            var overshoot = (this.x + xm) - 1;
-            var close = 1 - this.x;
-            xm = close - overshoot;
-            this.angle = (this.angle >= 0 ? Math.PI : -Math.PI) - this.angle;
-        }
-        
-        if (this.y + ym < 0) {
-            var overshoot = (this.y + ym) - 0;
-            var close = 0 - this.y;
-            ym = close - overshoot;
-            this.angle = -this.angle;
-        }
-        
-        if (this.x + xm < 0) {
-            var overshoot = (this.x + xm) - 0;
-            var close = 0 - this.x;
-            xm = close - overshoot;
-            this.angle = (this.angle >= 0 ? Math.PI : -Math.PI) - this.angle;
-        }
         
         this.x += xm;
         this.y += ym;

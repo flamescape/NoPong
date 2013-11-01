@@ -6,7 +6,7 @@ var GameBall = function() {
     _.defaults(this, {
         x: 0.5,
         y: 0.5,
-        radius: 0.05,
+        radius: 0.01,
         speed: 0,
         angle: 0,
         fps: 60
@@ -98,6 +98,8 @@ GameBall.prototype = {
                 y: 1,
                 fill: "#FFF"
             });
+            
+            layer.add(this._kShape);
         }
         
         return this._kShape;

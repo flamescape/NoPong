@@ -17,9 +17,6 @@ var bg = new Kinetic.Rect({
     fill: '#111'
 });
 layer.add(bg);
-//layer.add(player1);
-//layer.add(player2);
-//layer.add(ball);
 stage.add(layer);
 
 // the key elements of the game:
@@ -57,16 +54,22 @@ var gamePhysics = function() {
 var gameDraw = function() {
 
     paddles.forEach(function(paddle){
-        var attrs = {
+        paddle.cliGetShape(layer).setAttrs({
             offsetX: (paddle.width / 2) * gWidth,
             offsetY: (paddle.height / 2) * gHeight,
             x: paddle.x * gWidth,
             y: paddle.getPosition() * gHeight,
             width: paddle.width * gWidth,
             height: paddle.height * gHeight
-        };
-
-        paddle.cliGetShape(layer).setAttrs(attrs);
+        });
+    });
+    
+    gameBall.cliGetShape(layer).setAttrs({
+        offsetX: (gameBall.radius / 2) * gWidth,
+        offsetY: (gameBall.radius / 2) * gHeight,
+        x: gameBall.x * gWidth,
+        y: gameBall.y * gHeight,
+        radius: gameBall.radius * gWidth
     });
     
     //batchDraw() is limited by the maximum browser fps

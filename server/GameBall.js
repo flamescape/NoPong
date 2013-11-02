@@ -1,5 +1,6 @@
 var _ = _ || require('underscore')
   , SAT = SAT || require('./SAT')
+  , sound = sound || {}
   ;
 
 var GameBall = function() {
@@ -14,6 +15,7 @@ var GameBall = function() {
     this.paddles = [];
     this.collisionCircle = new SAT.Circle(new SAT.Vector(this.x, this.y), this.radius);
     this.collisionResponse = new SAT.Response();
+    this.onCollide = function(){};
 };
 GameBall.prototype = {
 
@@ -24,9 +26,6 @@ GameBall.prototype = {
     
     update: function(data) {
         _.isObject(data) && _.extend(this, data || {});
-        this.collisionCircle.r = this.radius;
-        this.collisionCircle.pos.x = this.x;
-        this.collisionCircle.pos.y = this.y;
         return this;
     },
     
@@ -54,42 +53,66 @@ GameBall.prototype = {
             } else {
                 this.angle = -this.angle;
             }
+            this.onCollide(1);
         }
         
         return newM;
     },
     
-    tick: function(){
+    tick: function(cb){
         var delta = this.calcDelta();
         if (!delta) {
             // delta === 0 ? no time has passed.
             // delta === null ? nothing to calculate.
-            return;
-        }        
+            return cb&&cb();
+        }
+    
+        this.collisionCircle.r = this.radius;
+        this.collisionCircle.pos.x = this.x;
+        this.collisionCircle.pos.y = this.y;
 
         while (this.angle > Math.PI) { this.angle -= Math.PI; }
         while (this.angle < -Math.PI) { this.angle += Math.PI; }
-        
+            
         var xm = Math.cos(this.angle) * this.speed * delta;
         var ym = Math.sin(this.angle) * this.speed * delta;
+
+        if (this.server) {
         
-        // check for paddle collisions
-        this.paddles.forEach(function(paddle){
-            var collision = SAT.testPolygonCircle(paddle.getCollisionPolygon(), this.collisionCircle, this.collisionResponse);
-            if (collision) {
-                console.log('Collide!', this.collisionResponse);
-                this.collisionResponse.clear();
-            }
-        }.bind(this));
+            // check for paddle collisions
+            this.paddles.forEach(function(paddle){
+                var collision = SAT.testPolygonCircle(paddle.getCollisionPolygon(), this.collisionCircle, this.collisionResponse);
+                if (collision) {
+                    // calculate reflection vector based on current direction
+                    var reflection = this.collisionResponse.overlapV.reflect(new SAT.V(xm, ym));
+                
+                    xm = this.collisionResponse.overlapV.x;
+                    ym = this.collisionResponse.overlapV.y;
+                    
+                    // add reflection vector to xm + ym
+                    xm += reflection.x;
+                    ym += reflection.y;
+                    
+                    // set new angle to the reflection vector
+                    this.angle = Math.atan2(ym, xm);
+                    //console.log('Collide!', this.collisionResponse);
+                    this.collisionResponse.clear();
+                    this.onCollide(2);
+                }
+            }.bind(this));
+            
+            // check for wall collisions
+            ym = this.collideWall(ym, 1, false);
+            ym = this.collideWall(ym, 0, false);
+            xm = this.collideWall(xm, 1, true);
+            xm = this.collideWall(xm, 0, true);
         
-        // check for wall collisions
-        ym = this.collideWall(ym, 1, false);
-        ym = this.collideWall(ym, 0, false);
-        xm = this.collideWall(xm, 1, true);
-        xm = this.collideWall(xm, 0, true);
+        }
         
         this.x += xm;
         this.y += ym;
+        
+        return cb&&cb();
     },
     
     // only the client should ever call this function

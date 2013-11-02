@@ -2,6 +2,11 @@ var gRatio = 16/9;
 var gWidth = document.width; //Game window width
 var gHeight = parseInt(gWidth / gRatio); //Game window height
 
+var sound = {
+    bip: new Audio('audio/bip.wav'),
+    boop: new Audio('audio/boop.wav')
+};
+
 // set up stage
 var stage = new Kinetic.Stage({
     container: 'container',
@@ -43,6 +48,13 @@ socket.on('enterRoom', function(roomState){
     
     socket.on('b', function(data){
         gameBall.update(data);
+    });
+    
+    socket.on('c', function(what){
+        switch (what) {
+            case 1: sound.bip.play(); break;
+            case 2: sound.boop.play(); break;
+        }
     });
 });
 

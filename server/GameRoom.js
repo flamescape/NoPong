@@ -1,17 +1,10 @@
 require('colors');
 
-var ClientController = function(cli, room){
-    this.lastPos = 0.5;
-    
-    cli.sock.on('m', function(pos){
-        this.lastPos = pos;
-        cli.sock.broadcast.to(room).volatile.emit('m', {side:cli.side, pos:pos});
-    }.bind(this));
-};
-
 var _ = require('underscore')
   , GameBall = require('./GameBall')
   , Paddle = require('./Paddle')
+  , ClientController = require('./ClientController')
+  , async = require('async')
   ;
 
 var gameCounter = 0;
@@ -23,6 +16,11 @@ var GameRoom = function(io){
     this.clients = [];
     
     this.ball = new GameBall();
+    this.ball.onCollide = function(what){ // what: player = 1, wall = 2
+        this.io.sockets.in(this.ioRoom).emit('c', what);
+        this.updateBall(false);
+    }.bind(this);
+    this.ball.server = true;
     this.paddles = [];
     
     this.log('Room Created'.red);
@@ -75,21 +73,24 @@ GameRoom.prototype.gameStart = function(){
         });
     }.bind(this));
     
+    this.running  = true;
     this.log('Fight!!'.yellow);
     
     this.intervals = [
-        // update the ball physics 60fps
-        setInterval(this.ball.tick.bind(this.ball), 1000/60),
-        // relay accurate position information to the clients every 1/2 second
-        setInterval(this.updateBall.bind(this), 500)
+        // update the ball physics (more frequently the better)
+        setInterval(this.ball.tick.bind(this.ball), 10),
+        // relay accurate position information to the clients
+        setInterval(this.updateBall.bind(this, true), 200)
     ];
     
     //setTimeout(this.updateBall.bind(this, {angle:1,speed:0.001}), 3000);
-    setTimeout(this.updateBall.bind(this, {angle:1,speed:0,x:0.95}), 1000);
+    setTimeout(this.updateBall.bind(this, false, {angle:1,speed:0.005,x:0.5}), 1000);
 };
-GameRoom.prototype.updateBall = function(data) {
-    this.ball.update(data);
-    this.io.sockets.in(this.ioRoom).emit('b', _.pick(
+GameRoom.prototype.updateBall = function(volatile, data) {
+    this.ball.update(data || {});
+    var roomSocks = this.io.sockets.in(this.ioRoom);
+    if (volatile) { roomSocks = roomSocks.volatile; }
+    roomSocks.emit('b', _.pick(
         this.ball,
         'x',
         'y',
@@ -101,6 +102,7 @@ GameRoom.prototype.log = function(){
     console.log.bind(console, 'Game Room '+this.roomNumber+':').apply(console, arguments);
 };
 GameRoom.prototype.terminate = function() {
+    this.running = false;
     this.intervals.forEach(clearInterval);
 };
 

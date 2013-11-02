@@ -6,13 +6,14 @@ var GameBall = function() {
     _.defaults(this, {
         x: 0.5,
         y: 0.5,
-        radius: 0.01,
+        radius: 0.02,
         speed: 0,
         angle: 0,
         fps: 60
     });
     this.paddles = [];
-    this.collisionBox = new SAT.Box(this.x, this.y, this.radius, this.radius).toPolygon();
+    this.collisionCircle = new SAT.Circle(new SAT.Vector(this.x, this.y), this.radius);
+    this.collisionResponse = new SAT.Response();
 };
 GameBall.prototype = {
 
@@ -23,6 +24,9 @@ GameBall.prototype = {
     
     update: function(data) {
         _.isObject(data) && _.extend(this, data || {});
+        this.collisionCircle.r = this.radius;
+        this.collisionCircle.pos.x = this.x;
+        this.collisionCircle.pos.y = this.y;
         return this;
     },
     
@@ -71,12 +75,12 @@ GameBall.prototype = {
         
         // check for paddle collisions
         this.paddles.forEach(function(paddle){
-            // todo: see comment ^
-            /*
-            if (this.y + ym > paddle.top) {
-                xm = this.collideWall(xm, 0.9, true);
-            }*/
-        });
+            var collision = SAT.testPolygonCircle(paddle.getCollisionPolygon(), this.collisionCircle, this.collisionResponse);
+            if (collision) {
+                console.log('Collide!', this.collisionResponse);
+                this.collisionResponse.clear();
+            }
+        }.bind(this));
         
         // check for wall collisions
         ym = this.collideWall(ym, 1, false);
@@ -92,8 +96,9 @@ GameBall.prototype = {
     cliGetShape: function() {
         if (!this._kShape) {
             // create shape. (position & dims are temporary. real values computed on draw)
-            this._kShape = new Kinetic.Ellipse({
-                radius: 1,
+            this._kShape = new Kinetic.Rect({
+                width: 1,
+                height: 1,
                 x: 1,
                 y: 1,
                 fill: "#FFF"

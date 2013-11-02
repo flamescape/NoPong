@@ -1,4 +1,6 @@
-var _ = _ || require('underscore');
+var _ = _ || require('underscore')
+  , SAT = SAT || require('./SAT')
+  ;
 
 var Paddle = function(info, controller) {
     _.defaults(this, {
@@ -8,6 +10,15 @@ var Paddle = function(info, controller) {
     });
     _.extend(this, info || {});
     this.controller = controller;
+    this.collisionBox = new SAT.Box(new SAT.Vector(this.x,this.y), this.width, this.height);
+};
+
+Paddle.prototype.getCollisionPolygon = function(){
+    this.collisionBox.pos.x = this.x - (this.width / 2);
+    this.collisionBox.pos.y = this.getPosition() - (this.height / 2);
+    this.collisionBox.width = this.width;
+    this.collisionBox.height = this.height;
+    return this.collisionBox.toPolygon(); // could probably cache this polygon if nothing has changed
 };
 
 Paddle.prototype.getPosition = function() {
@@ -35,12 +46,6 @@ Paddle.prototype.cliGetShape = function(layer){
     }
     
     return this._kShape;
-};
-
-Paddle.prototype.resize = function(w, h) {
-    this.rect.setWidth(this.width * w);
-    this.rect.setHeight(this.height * h);
-    //p.rect.setX((p.x - (p.width / 2)) * gWidth);
 };
 
 (typeof module !== 'undefined') && (module.exports = Paddle);

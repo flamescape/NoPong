@@ -19,7 +19,7 @@ var bg = new Kinetic.Rect({
     y: 0,
     width: gWidth,
     height: gHeight,
-    fill: '#111'
+    fill: '#110'
 });
 layer.add(bg);
 stage.add(layer);

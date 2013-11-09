@@ -1,4 +1,4 @@
-var gRatio = 16/9;
+var gRatio = 16 / 9;
 var gWidth = document.width; //Game window width
 var gHeight = parseInt(gWidth / gRatio); //Game window height
 
